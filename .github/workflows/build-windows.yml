@@ -1,0 +1,47 @@
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -r requirements.txt
+        
+    - name: Build EXE
+      run: |
+        python -m pip install pyinstaller
+        python -m PyInstaller --clean --noconfirm main.spec
+        
+    - name: Verify build
+      run: |
+        echo "=== dist directory structure ==="
+        dir dist
+        echo ""
+        echo "=== EXE file info ==="
+        dir dist\main.exe
+        
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: mail-sender-exe
+        path: dist/main.exe
+        
+    - name: Test EXE (background)
+      run: |
+        start /B dist\main.exe
+        timeout /t 10
+        tasklist | findstr main.exe

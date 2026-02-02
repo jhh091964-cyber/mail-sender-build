@@ -42,5 +42,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mail-sender-dist
-          path: dist/**
+          name: mail-sender-windows
+          path: dist/main/**

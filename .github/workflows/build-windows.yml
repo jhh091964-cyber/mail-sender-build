@@ -22,15 +22,14 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
-          pip install pyinstaller
+          python -m pip install -r requirements.txt
+          python -m pip install pyinstaller
 
-      # ✅ UPX 必须在打包前安装，PyInstaller 才能使用
       - name: Install UPX
         run: choco install upx -y
 
       - name: Build EXE
-        run: pyinstaller --clean --noconfirm main.spec
+        run: pyinstaller --clean --noconfirm --log-level=DEBUG main.spec
 
       - name: Verify build
         run: |
@@ -38,10 +37,10 @@ jobs:
           dir dist
           echo ""
           echo "=== EXE file info ==="
-          dir dist\main.exe
+          dir dist
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mail-sender-exe
-          path: dist/main.exe
+          name: mail-sender-dist
+          path: dist/**

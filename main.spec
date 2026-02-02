@@ -23,7 +23,35 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+
+    # ✅ Qt 瘦身：排除你通常用不到、但體積很大的模組
+    # （只要你的程式沒有內嵌瀏覽器/影音/地圖/3D/藍牙/圖表，這些都可安全排除）
+    excludes=[
+        # WebEngine (非常大；若你沒用 QWebEngineView 就排除)
+        'PySide6.QtWebEngineWidgets',
+        'PySide6.QtWebEngineCore',
+        'PySide6.QtWebEngineQuick',
+
+        # Multimedia
+        'PySide6.QtMultimedia',
+        'PySide6.QtMultimediaWidgets',
+
+        # Location / Positioning
+        'PySide6.QtPositioning',
+        'PySide6.QtLocation',
+
+        # 3D
+        'PySide6.Qt3DCore',
+        'PySide6.Qt3DRender',
+        'PySide6.Qt3DInput',
+
+        # Bluetooth
+        'PySide6.QtBluetooth',
+
+        # Charts
+        'PySide6.QtCharts',
+    ],
+
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,

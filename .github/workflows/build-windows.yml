@@ -39,3 +39,6 @@ jobs:
       with:
         name: mail-sender-exe
         path: dist/main.exe
+        
+    - name: Install UPX
+      run: choco install upx -y

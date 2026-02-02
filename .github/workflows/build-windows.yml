@@ -14,37 +14,66 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          architecture: 'x64'
+          python-version: "3.11"
+          architecture: "x64"
 
       - name: Upgrade pip
+        shell: pwsh
         run: python -m pip install --upgrade pip
 
       - name: Install dependencies
+        shell: pwsh
         run: |
           python -m pip install -r requirements.txt
           python -m pip install pyinstaller
 
+      # ✅ UPX 必须在打包前安装，PyInstaller 才能使用
       - name: Install UPX
+        shell: pwsh
         run: choco install upx -y
 
       - name: Build EXE
-        run: pyinstaller --clean --noconfirm --log-level=DEBUG main.spec
-
-      - name: Verify build
+        shell: pwsh
         run: |
-          echo "=== dist directory structure ==="
-          dir dist
-          echo ""
-          echo "=== EXE file info ==="
-          dir dist
+          pyinstaller --clean --noconfirm --log-level=DEBUG main.spec
+          Write-Host "=== PyInstaller exit code: $LASTEXITCODE ==="
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-      - name: Upload artifact
+      - name: Verify build (find outputs)
+        shell: pwsh
+        run: |
+          Write-Host "=== PWD ==="
+          Get-Location
+
+          Write-Host "=== top-level files ==="
+          Get-ChildItem -Force
+
+          Write-Host "=== list dist/build if exist ==="
+          "dist","build" | ForEach-Object {
+            if (Test-Path $_) {
+              Write-Host ("--- listing: " + $_ + " ---")
+              Get-ChildItem $_ -Recurse -Force | Select-Object FullName, Length
+            } else {
+              Write-Host ("--- missing: " + $_ + " ---")
+            }
+          }
+
+          Write-Host "=== find exe anywhere under workspace ==="
+          $exes = Get-ChildItem -Recurse -Force -ErrorAction SilentlyContinue -Filter *.exe
+          if ($exes) {
+            $exes | Select-Object FullName, Length
+          } else {
+            Write-Host "NO EXE FOUND"
+            exit 1
+          }
+
+      # ✅ 这里不再赌 dist/**，直接把 dist/build 一起打包上传
+      - name: Upload artifact (dist+build)
         uses: actions/upload-artifact@v4
         with:
           name: mail-sender-windows
           path: |
-            dist\**
-            dist/**
-            **\*.exe
+            dist
+            build
+            *.spec
           if-no-files-found: error

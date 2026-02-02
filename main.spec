@@ -1,9 +1,3 @@
-# -*- mode: python ; coding: utf-8 -*-
-
-import certifi
-
-block_cipher = None
-
 a = Analysis(
     ['main.py'],
     pathex=[],
@@ -12,20 +6,29 @@ a = Analysis(
         (certifi.where(), 'certifi'),
     ],
     hiddenimports=[
+        # Qt
         'PySide6.QtCore',
         'PySide6.QtGui',
         'PySide6.QtWidgets',
+
+        # third-party
         'requests',
         'paramiko',
         'certifi',
         'socks',
+
+        # 🔴 專案內模組（最重要）
+        'sender_manager',
+        'proxy_handler',
+        'resend_provider',
+        'template_manager',
+        'ssh_tunnel',
+        'variable_parser',
     ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
 
-    # ✅ Qt 瘦身：排除你通常用不到、但體積很大的模組
-    # （只要你的程式沒有內嵌瀏覽器/影音/地圖/3D/藍牙/圖表，這些都可安全排除）
     excludes=[
         # WebEngine (非常大；若你沒用 QWebEngineView 就排除)
         'PySide6.QtWebEngineWidgets',
@@ -56,29 +59,4 @@ a = Analysis(
     win_private_assemblies=False,
     cipher=block_cipher,
     noarchive=False,
-)
-
-pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
-
-exe = EXE(
-    pyz,
-    a.scripts,
-    a.binaries,
-    a.zipfiles,
-    a.datas,
-    [],
-    name='main',
-    debug=False,
-    bootloader_ignore_signals=False,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    runtime_tmpdir=None,
-    console=False,
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
-    icon=None,
 )

@@ -1,37 +1,35 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import os
 import certifi
-from PyInstaller.utils.hooks import collect_submodules
 
 block_cipher = None
 
-hiddenimports = (
-    collect_submodules("PySide6")
-    + [
-        "requests",
-        "paramiko",
-        "certifi",
+a = Analysis(
+    ["main.py"],
+    pathex=[os.path.abspath(".")],
+    binaries=[],
+    datas=[
+        # certifi CA bundle，避免 HTTPS 憑證錯誤
+        (certifi.where(), "certifi"),
+    ],
+    hiddenimports=[
+        # socks 讓 requests 支援 SOCKS
         "socks",
+
+        # 專案內模組（避免打包漏掉）
         "sender_manager",
         "proxy_handler",
         "resend_provider",
         "template_manager",
         "ssh_tunnel",
         "variable_parser",
-    ]
-)
-
-a = Analysis(
-    ["main.py"],
-    pathex=["."],
-    binaries=[],
-    datas=[
-        (certifi.where(), "certifi"),
     ],
-    hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
+
+    # ✅ Qt 瘦身（你沒用到下列功能就排除，可大幅降低體積/依賴）
     excludes=[
         "PySide6.QtWebEngineWidgets",
         "PySide6.QtWebEngineCore",
@@ -46,7 +44,9 @@ a = Analysis(
         "PySide6.QtBluetooth",
         "PySide6.QtCharts",
     ],
+
     noarchive=False,
+    cipher=block_cipher,
 )
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
@@ -55,13 +55,14 @@ exe = EXE(
     pyz,
     a.scripts,
     [],
-    exclude_binaries=True,
-    name="main",
+    exclude_binaries=True,   # 配合 COLLECT 做 onedir（最穩定）
+    name="mail_sender",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
-    console=False,
+    upx=True,                # 有裝 UPX 就會壓縮
+    console=False,            # GUI 無黑窗
+    disable_windowed_traceback=False,
 )
 
 coll = COLLECT(
@@ -71,5 +72,5 @@ coll = COLLECT(
     a.datas,
     strip=False,
     upx=True,
-    name="main",
+    name="mail_sender",
 )

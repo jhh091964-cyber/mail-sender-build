@@ -68,12 +68,11 @@ jobs:
           }
 
       # ✅ 这里不再赌 dist/**，直接把 dist/build 一起打包上传
-      - name: Upload artifact (dist+build)
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: mail-sender-windows
           path: |
-            dist
-            build
-            *.spec
+            dist/**
+            build/**
           if-no-files-found: error

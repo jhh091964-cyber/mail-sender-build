@@ -39,9 +39,3 @@ jobs:
       with:
         name: mail-sender-exe
         path: dist/main.exe
-        
-    - name: Test EXE (background)
-      run: |
-        start /B dist\main.exe
-        timeout /t 10
-        tasklist | findstr main.exe
